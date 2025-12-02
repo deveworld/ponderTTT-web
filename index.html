@@ -75,7 +75,14 @@
             <li><strong>Base Model:</strong> Pretrained GPT-2 (125M, 350M) with frozen backbone weights</li>
             <li><strong>Fast-Weight Layer (<code>TTTLayer</code>):</strong> TTT-Linear with causal convolutions and dual-form updates</li>
             <li><strong>Binary Gating Network:</strong> Lightweight MLP that makes SKIP/UPDATE decisions via Gumbel-Softmax</li>
-            <li><strong>End-to-End Loss:</strong> \( L_{total} = L_{CE} + \beta \cdot L_{TTT} + \gamma \cdot L_{cost} \)</li>
+            <li><strong>Training Objective:</strong> Top-k Discriminative Gating. Instead of an explicit cost penalty, we use an implicit budget constraint by training the gate to identify the top-k% chunks with the highest TTT advantage.</li>
+            <li><strong>Loss Function:</strong> \( L_{total} = L_{CE} + \beta \cdot L_{TTT} + L_{gate} \)
+                <ul>
+                    <li>\( L_{CE} \): Main task cross-entropy (always computed with TTT updates)</li>
+                    <li>\( L_{TTT} \): TTT reconstruction loss (auxiliary self-supervised task)</li>
+                    <li>\( L_{gate} \): Binary Cross-Entropy (BCE) loss aligning the gate with the oracle Top-k ranking</li>
+                </ul>
+            </li>
         </ul>
     </section>
 
@@ -87,7 +94,7 @@
         <ul>
             <li>Pure NNX GPT-2, TTT Layer with Binary Gating</li>
             <li>Gumbel-Softmax training for SKIP/UPDATE decisions</li>
-            <li>End-to-End differentiable training with budget constraints</li>
+            <li>End-to-End differentiable training with Top-k Discriminative Gating</li>
             <li>Results on GPT-2 (125M, 350M) with OOD evaluation</li>
         </ul>
 
@@ -111,18 +118,17 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Install the project in editable mode
 uv pip install -e . --group gpu # or tpu/cpu</code></pre>
 
-        <h3>Training Binary Gating</h3>
+        <h3>Reproduce Paper Results (Recommended)</h3>
+        <p>Run the full suite of experiments (Training, OOD Evaluation, Latency, Ablations) with a single script:</p>
+        <pre><code>chmod +x scripts/run_all_experiments.sh
+./scripts/run_all_experiments.sh</code></pre>
+
+        <h3>Manual Training</h3>
         <pre><code>python -m ponderttt.experiments.train_hard_skip \
     --model_scale 125m \
     --target_update_rate 0.5 \
     --num_iterations 10000 \
     --output_dir outputs/hard_skip</code></pre>
-
-        <h3>Evaluation</h3>
-        <pre><code>python -m ponderttt.experiments.compare_methods \
-    --model_scale 125m \
-    --budget 2.0 \
-    --num_eval_batches 20</code></pre>
     </section>
 
     <section id="citation">
