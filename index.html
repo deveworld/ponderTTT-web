@@ -114,7 +114,7 @@ uv pip install -e . --group gpu # or tpu/cpu</code></pre>
         <h3>Training Binary Gating</h3>
         <pre><code>python -m ponderttt.experiments.train_hard_skip \
     --model_scale 125m \
-    --target_skip_rate 0.5 \
+    --target_update_rate 0.5 \
     --num_iterations 10000 \
     --output_dir outputs/hard_skip</code></pre>
 
