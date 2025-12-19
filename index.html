@@ -1,232 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PonderTTT: Adaptive Test-Time Training</title>
     <link rel="stylesheet" href="styles.css">
-    <meta name="description" content="Adaptive, budget-aware Test-Time Training (TTT) for code generation models. Training-free gating achieves 80% of oracle performance.">
+    <meta name="description"
+        content="Adaptive, budget-aware Test-Time Training (TTT) for code generation models. Reconstruction Gating recovers 99% of oracle performance.">
     <!-- KaTeX for LaTeX rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" integrity="sha384-WcoG4HRXMzYzfCgiyfrySxx90XSl2rxY5mnVY5TwtWE6KLrArNKn0T/mOgNL0Mmi" crossorigin="anonymous">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.js" integrity="sha384-J+9dG2KMoiR9hqcFao0IBLwxt6zpcyN68IgwzsCSkbreXUjmNVRhPFTssqdSGjwQ" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
-    onload="renderMathInElement(document.body);"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
+        integrity="sha384-WcoG4HRXMzYzfCgiyfrySxx90XSl2rxY5mnVY5TwtWE6KLrArNKn0T/mOgNL0Mmi" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.js"
+        integrity="sha384-J+9dG2KMoiR9hqcFao0IBLwxt6zpcyN68IgwzsCSkbreXUjmNVRhPFTssqdSGjwQ"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/contrib/auto-render.min.js"
+        integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
 </head>
+
 <body>
 
-<div class="container">
-    <header>
-        <h1>PonderTTT</h1>
-        <p class="subtitle">Adaptive, budget-aware Test-Time Training (TTT) for code generation models built with JAX/Flax NNX.</p>
-        <div class="links">
-            <a href="https://github.com/deveworld/ponderttt" class="btn">View on GitHub</a>
-            <a href="PonderTTT_preprint.pdf" class="btn btn-outline">Read Preprint</a>
-        </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>PonderTTT</h1>
+            <p class="subtitle">Adaptive, budget-aware Test-Time Training (TTT) for code generation models built with
+                JAX/Flax NNX.</p>
+            <div class="links">
+                <a href="https://github.com/deveworld/ponderttt" class="btn">View on GitHub</a>
+                <a href="PonderTTT_preprint.pdf" class="btn btn-outline">Read Preprint</a>
+            </div>
+        </header>
 
-    <section id="core-idea">
-        <h2>Core Idea: Training-Free Adaptive Gating</h2>
-        <p>PonderTTT introduces <strong>Adaptive Test-Time Training</strong> with learned SKIP/UPDATE decisions. We developed a <strong>Crawl-Walk-Run</strong> approach that achieves 80% of oracle performance without any additional training.</p>
+        <section id="core-idea">
+            <h2>Core Idea: Scale-Dependent Inversion</h2>
+            <p>PonderTTT introduces <strong>Adaptive Test-Time Training</strong> with a simple, powerful heuristic: the
+                TTT layer's self-supervised <strong>Reconstruction Loss</strong>. We verified that this signal is a
+                robust proxy for learnability, but its relationship with performance <strong>inverts</strong> at scale.
+            </p>
 
-        <h3>Crawl-Walk-Run Paradigm</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Phase</th>
-                    <th>Method</th>
-                    <th>Oracle Capture</th>
-                    <th>Online</th>
-                    <th>Training</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Crawl</strong></td>
-                    <td>Top-k TTT Improvement</td>
-                    <td>80.5%</td>
-                    <td>No</td>
-                    <td>None</td>
-                </tr>
-                <tr>
-                    <td><strong>Walk</strong></td>
-                    <td>Fixed Threshold</td>
-                    <td>69.3%</td>
-                    <td>Yes</td>
-                    <td>None</td>
-                </tr>
-                <tr>
-                    <td><strong>Run</strong></td>
-                    <td>Multi-signal + Budget-aware</td>
-                    <td>TBD</td>
-                    <td>Yes</td>
-                    <td>Optional</td>
-                </tr>
-            </tbody>
-        </table>
+            <h3>Scaling Law: The Inversion</h3>
+            <p>The correlation between Reconstruction Loss and TTT Benefit ($r$) flips from positive to negative as
+                model size increases:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Correlation ($r$)</th>
+                        <th>Optimal Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>125M</strong></td>
+                        <td><strong>+0.86</strong></td>
+                        <td>Normal Gating (Update on High Loss)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>350M</strong></td>
+                        <td><strong>-0.58</strong></td>
+                        <td>Inverted Gating (Update on Low Loss)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Large (774M)</strong></td>
+                        <td><strong>-0.84</strong></td>
+                        <td>Inverted Gating</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XL (1.5B)</strong></td>
+                        <td><strong>-0.94</strong></td>
+                        <td>Inverted Gating</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <p><strong>Key Insight:</strong> TTT's internal self-supervision loss directly measures "how much the model wants to learn" from the current context (Spearman &rho; = 0.63 with oracle).</p>
+            <p><strong>Key Insight:</strong> Small models benefit from updating on "surprising" (high loss) data.
+                Detailed analysis reveals that larger models treat high-loss chunks as noise; updating on them degrades
+                performance. Inverted Gating recovers <strong>99%</strong> of oracle performance on large models.</p>
 
-        <h3>Key Results (GPT-2 125M, 50% Update Rate)</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Method</th>
-                    <th>Loss</th>
-                    <th>Cost</th>
-                    <th>vs Random</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Random Skip (50%)</td>
-                    <td>3.619</td>
-                    <td>2.0x</td>
-                    <td>baseline</td>
-                </tr>
-                <tr style="background-color: #e8f5e9;">
-                    <td><strong>TTT Improvement</strong></td>
-                    <td><strong>3.307</strong></td>
-                    <td><strong>2.0x</strong></td>
-                    <td><strong>+8.6%</strong></td>
-                </tr>
-                <tr>
-                    <td>UPDATE_1 (always)</td>
-                    <td>3.328</td>
-                    <td>3.0x</td>
-                    <td>-</td>
-                </tr>
-                <tr>
-                    <td>Oracle (upper bound)</td>
-                    <td>3.231</td>
-                    <td>2.0x</td>
-                    <td>+10.7%</td>
-                </tr>
-            </tbody>
-        </table>
-        <p><strong>TTT Improvement gating beats always-UPDATE with 33% less compute!</strong></p>
+            <h3>Key Results (In-Distribution Python)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Base Loss</th>
+                        <th>Ours Loss</th>
+                        <th>Oracle Capture</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>125M</strong></td>
+                        <td>3.935</td>
+                        <td><strong>2.673</strong></td>
+                        <td>99.2%</td>
+                        <td>2.0x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>350M</strong></td>
+                        <td>4.074</td>
+                        <td><strong>2.771</strong></td>
+                        <td>92.5%</td>
+                        <td>2.0x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Large (774M)</strong></td>
+                        <td>5.332</td>
+                        <td><strong>3.310</strong></td>
+                        <td>100.0%</td>
+                        <td>2.0x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XL (1.5B)</strong></td>
+                        <td>6.357</td>
+                        <td><strong>2.976</strong></td>
+                        <td>100.0%</td>
+                        <td>2.0x</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Perfect Recovery:</strong> PonderTTT recovers effectively all of the possible performance gain
+                achievable by an Oracle on large models.</p>
 
-        <h3>OOD Generalization (trained on Python, evaluated on 1000 chunks)</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Language</th>
-                    <th>Baseline (SKIP)</th>
-                    <th>Ours (Recon Gating)</th>
-                    <th>Improvement</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>JavaScript</td>
-                    <td>PPL 79</td>
-                    <td>PPL 22</td>
-                    <td>3.6x</td>
-                </tr>
-                <tr>
-                    <td>Java</td>
-                    <td>PPL 138</td>
-                    <td>PPL 30</td>
-                    <td>4.6x</td>
-                </tr>
-                <tr>
-                    <td>Go</td>
-                    <td>PPL 23,624</td>
-                    <td>PPL 652</td>
-                    <td>36.2x</td>
-                </tr>
-            </tbody>
-        </table>
-        <p><em>Note: Go's high baseline PPL reflects GPT-2's weak performance on Go syntax.</em></p>
-    </section>
+            <h3>OOD Generalization (Trained on Python, Tested on New Languages)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Language</th>
+                        <th>Scale</th>
+                        <th>Baseline (SKIP)</th>
+                        <th>Ours (Recon Gating)</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>JavaScript</td>
+                        <td>125M</td>
+                        <td>PPL 79</td>
+                        <td>PPL 22</td>
+                        <td>3.6x</td>
+                    </tr>
+                    <tr>
+                        <td>Go</td>
+                        <td>350M</td>
+                        <td>PPL 5014</td>
+                        <td>PPL 236</td>
+                        <td>21.4x</td>
+                    </tr>
+                </tbody>
+            </table>
 
-    <section id="technical-architecture">
-        <h2>Technical Architecture</h2>
-        <p>Pure <strong>JAX/Flax NNX</strong> implementation with multi-scale model support.</p>
+            <h3>Latency & Efficiency (NVIDIA A100)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Latency</th>
+                        <th>Rel. Speed</th>
+                        <th>GPU Util</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Baseline (SKIP)</td>
+                        <td>1.88 ms</td>
+                        <td>1.00x</td>
+                        <td>12.6%</td>
+                    </tr>
+                    <tr>
+                        <td>Baseline (UPDATE_1)</td>
+                        <td>1.79 ms</td>
+                        <td>0.95x</td>
+                        <td>33.4%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PonderTTT</strong></td>
+                        <td><strong>2.26 ms</strong></td>
+                        <td><strong>1.20x</strong></td>
+                        <td><strong>29.3%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Memory-Bound Efficiency:</strong> TTT updates utilize idle compute capacity (GPU utilization 12%
+                &rarr; 33%) in memory-bound small-batch inference, incurring minimal latency overhead.</p>
+        </section>
 
-        <h3>Supported Models</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Model</th>
-                    <th>Parameters</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>GPT-2 125M</td><td>125M</td><td>Validated</td></tr>
-                <tr><td>GPT-2 350M</td><td>350M</td><td>Validated</td></tr>
-                <tr><td>Gemma 3 1B</td><td>1B</td><td>In Progress</td></tr>
-                <tr><td>Gemma 3 4B</td><td>4B</td><td>In Progress</td></tr>
-                <tr><td>Gemma 3 12B</td><td>12B</td><td>In Progress (TPU)</td></tr>
-            </tbody>
-        </table>
+        <section id="technical-architecture">
+            <h2>Technical Architecture</h2>
+            <p>Pure <strong>JAX/Flax NNX</strong> implementation with multi-scale model support.</p>
 
-        <h3>Components</h3>
-        <ul>
-            <li><strong>Base Model:</strong> Pretrained backbone with frozen weights</li>
-            <li><strong>TTT Layer:</strong> Fast-weight adapter with self-supervised updates</li>
-            <li><strong>Gating Signals:</strong>
-                <ul>
-                    <li>TTT Improvement (&rho; = 0.63 correlation with oracle)</li>
-                    <li>Prediction entropy</li>
-                    <li>Token confidence</li>
-                    <li>Budget-aware threshold adjustment</li>
-                </ul>
-            </li>
-        </ul>
+            <h3>Supported Models</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Parameters</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GPT-2 125M</td>
+                        <td>125M</td>
+                        <td>Validated</td>
+                    </tr>
+                    <tr>
+                        <td>GPT-2 350M</td>
+                        <td>350M</td>
+                        <td>Validated</td>
+                    </tr>
+                    <tr>
+                        <td>GPT-2 Large</td>
+                        <td>774M</td>
+                        <td>Validated</td>
+                    </tr>
+                    <tr>
+                        <td>GPT-2 XL</td>
+                        <td>1.5B</td>
+                        <td>Validated</td>
+                    </tr>
+                    <tr>
+                        <td>Gemma 3 1B</td>
+                        <td>1B</td>
+                        <td>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>Gemma 3 4B</td>
+                        <td>4B</td>
+                        <td>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>Gemma 3 12B</td>
+                        <td>12B</td>
+                        <td>In Progress (TPU)</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <h3>Loss Function</h3>
-        <p>\( L_{total} = L_{CE} + \beta \cdot L_{TTT} \)</p>
-        <ul>
-            <li>\( L_{CE} \): Main task cross-entropy (next-token prediction)</li>
-            <li>\( L_{TTT} \): TTT reconstruction loss (self-supervised adaptation signal)</li>
-        </ul>
-    </section>
+            <h3>Components</h3>
+            <ul>
+                <li><strong>Base Model:</strong> Pretrained backbone with frozen weights</li>
+                <li><strong>TTT Layer:</strong> Fast-weight adapter with self-supervised updates</li>
+                <li><strong>Gating Signals:</strong>
+                    <ul>
+                        <li>Reconstruction Loss (Inverted for 350M+)</li>
+                        <li>Scale-Dependent Thresholds</li>
+                    </ul>
+                </li>
+            </ul>
 
-    <section id="roadmap">
-        <h2>Roadmap & Status</h2>
+            <h3>Loss Function</h3>
+            <p>\( L_{total} = L_{CE} + \beta \cdot L_{TTT} \)</p>
+            <ul>
+                <li>\( L_{CE} \): Main task cross-entropy (next-token prediction)</li>
+                <li>\( L_{TTT} \): TTT reconstruction loss (self-supervised adaptation signal)</li>
+            </ul>
+        </section>
 
-        <h3>Phase 1: Complete (Preprint)</h3>
-        <ul>
-            <li>Pure NNX GPT-2, TTT Layer implementation</li>
-            <li>Gumbel-Softmax training for SKIP/UPDATE decisions</li>
-            <li>End-to-End differentiable training with budget constraints</li>
-            <li>Results on GPT-2 (125M, 350M) with OOD evaluation</li>
-        </ul>
+        <section id="roadmap">
+            <h2>Roadmap & Status</h2>
 
-        <h3>Phase 2: In Progress</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Component</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>Crawl Phase (TTT Improvement gating)</td><td>Complete</td></tr>
-                <tr><td>Walk Phase (Fixed threshold, online)</td><td>Complete</td></tr>
-                <tr><td>Run Phase (Multi-signal + budget-aware)</td><td>In Progress</td></tr>
-                <tr><td>Gemma 3 Integration (1B, 4B, 12B)</td><td>In Progress</td></tr>
-                <tr><td>TPU Pod Sharding</td><td>In Progress</td></tr>
-                <tr><td>LoRA-TTT</td><td>Planned</td></tr>
-                <tr><td>Reasoning Benchmarks (MATH500, GSM8K, etc.)</td><td>Planned</td></tr>
-            </tbody>
-        </table>
-        <p>See <code>paper/plan.md</code> for detailed roadmap.</p>
-    </section>
+            <h3>Phase 1: Complete (Preprint)</h3>
+            <ul>
+                <li>Pure NNX GPT-2, TTT Layer implementation</li>
+                <li>Gumbel-Softmax training for SKIP/UPDATE decisions</li>
+                <li>End-to-End differentiable training with budget constraints</li>
+                <li>Results on GPT-2 (125M, 350M) with OOD evaluation</li>
+            </ul>
 
-    <section id="quick-start">
-        <h2>Quick Start</h2>
+            <h3>Phase 2: In Progress</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Crawl Phase (TTT Improvement gating)</td>
+                        <td>Complete</td>
+                    </tr>
+                    <tr>
+                        <td>Walk Phase (Fixed threshold, online)</td>
+                        <td>Complete</td>
+                    </tr>
+                    <tr>
+                        <td>Run Phase (Multi-signal + budget-aware)</td>
+                        <td>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>Gemma 3 Integration (1B, 4B, 12B)</td>
+                        <td>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>TPU Pod Sharding</td>
+                        <td>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>LoRA-TTT</td>
+                        <td>Planned</td>
+                    </tr>
+                    <tr>
+                        <td>Reasoning Benchmarks (MATH500, GSM8K, etc.)</td>
+                        <td>Planned</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>See <code>paper/plan.md</code> for detailed roadmap.</p>
+        </section>
 
-        <h3>Installation</h3>
-        <pre><code># Install uv if you do not have it yet
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+
+            <h3>Installation</h3>
+            <pre><code># Install uv if you do not have it yet
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Install the project
 uv pip install -e . --group gpu  # or tpu/cpu</code></pre>
 
-        <h3>Training-Free Gating (Recommended)</h3>
-        <pre><code>from ponderttt.models import create_advanced_gating
+            <h3>Training-Free Gating (Recommended)</h3>
+            <pre><code>from ponderttt.models import create_advanced_gating
 
 # Create gating network
 gating = create_advanced_gating(
@@ -243,18 +340,18 @@ result = gating(
 )
 should_update = result["decision"]</code></pre>
 
-        <h3>Reproduce Paper Results</h3>
-        <pre><code>chmod +x scripts/run_all_experiments.sh
+            <h3>Reproduce Paper Results</h3>
+            <pre><code>chmod +x scripts/run_all_experiments.sh
 ./scripts/run_all_experiments.sh</code></pre>
 
-        <h3>Evaluate Gating Methods</h3>
-        <pre><code># Compare TTT-only vs Multi-signal vs Budget-aware
+            <h3>Evaluate Gating Methods</h3>
+            <pre><code># Compare TTT-only vs Multi-signal vs Budget-aware
 python -m ponderttt.experiments.evaluate_advanced_gating \
     --checkpoint outputs/baselines/125m_update1/checkpoints/checkpoint_100000/ \
     --num_batches 1000</code></pre>
 
-        <h3>Gemma 3 on TPU</h3>
-        <pre><code>from ponderttt.models.gemma3 import (
+            <h3>Gemma 3 on TPU</h3>
+            <pre><code>from ponderttt.models.gemma3 import (
     Gemma3Config,
     Gemma3TTTModel,
     load_gemma3_from_huggingface,
@@ -271,21 +368,22 @@ model = load_gemma3_from_huggingface(model, "google/gemma-3-4b-pt")
 
 # Setup TPU sharding
 mesh = create_device_mesh(ShardingConfig())</code></pre>
-    </section>
+        </section>
 
-    <section id="citation">
-        <h2>Citation</h2>
-        <div class="citation">@article{sim2025ponderttt,
-  title={Learning to Ponder: Adaptive Compute Allocation via Test-Time Training},
-  author={Sim, Gihyeon},
-  year={2025}
-}</div>
-    </section>
+        <section id="citation">
+            <h2>Citation</h2>
+            <div class="citation">@article{sim2025ponderttt,
+                title={Learning to Ponder: Adaptive Compute Allocation via Test-Time Training},
+                author={Sim, Gihyeon},
+                year={2025}
+                }</div>
+        </section>
 
-    <footer>
-        <p>&copy; 2025 PonderTTT Project. Built with JAX/Flax NNX.</p>
-    </footer>
-</div>
+        <footer>
+            <p>&copy; 2025 PonderTTT Project. Built with JAX/Flax NNX.</p>
+        </footer>
+    </div>
 
 </body>
+
 </html>
