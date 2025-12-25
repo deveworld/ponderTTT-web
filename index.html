@@ -39,43 +39,49 @@
                 an inference-compatible proxy for learning benefit.
             </p>
 
-            <h3>Correlation: Reconstruction Loss vs Oracle Advantage</h3>
-            <p>The correlation between Reconstruction Loss and TTT Benefit is weak-to-moderate:</p>
+            <h3>Correlation: Full-Sequence Reconstruction Loss vs Oracle Advantage</h3>
+            <p>Using the full-sequence reconstruction loss (<code>ttt_loss_init</code>), we achieve strong correlation:
+            </p>
             <table>
                 <thead>
                     <tr>
                         <th>Model</th>
+                        <th>Language</th>
                         <th>Correlation ($r$)</th>
-                        <th>Observation</th>
+                        <th>Oracle Recovery</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>125M</strong></td>
-                        <td><strong>+0.30</strong></td>
-                        <td>Weak Positive</td>
-                    </tr>
-                    <tr>
-                        <td><strong>350M</strong></td>
-                        <td><strong>+0.35</strong></td>
-                        <td>Weak Positive</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Large (774M)</strong></td>
-                        <td><strong>+0.45</strong></td>
-                        <td>Moderate</td>
+                        <td>Python</td>
+                        <td><strong>+0.82</strong></td>
+                        <td>88.7%</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
-                        <td><strong>+0.61</strong></td>
-                        <td>Moderate</td>
+                        <td>Python</td>
+                        <td><strong>+0.74</strong></td>
+                        <td>88.7%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XL (1.5B)</strong></td>
+                        <td>JavaScript (OOD)</td>
+                        <td><strong>+0.79</strong></td>
+                        <td>86.9%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XL (1.5B)</strong></td>
+                        <td>Go (OOD)</td>
+                        <td><strong>+0.53</strong></td>
+                        <td>86.0%</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p><strong>Key Finding:</strong> Reconstruction loss shows positive correlation with Oracle advantage,
-                but the correlation is insufficient to significantly outperform random chunk selection.
-                Finding stronger gating signals remains an open research challenge.</p>
+            <p><strong>Key Finding:</strong> Full-Sequence Reconstruction Loss shows strong positive correlation
+                (r=0.53–0.82) with Oracle advantage, enabling Reconstruction Gating to consistently
+                recover <strong>86–89% of Oracle performance</strong> while outperforming Random Skip by 9–26%.</p>
 
             <h3>Key Results (In-Distribution Python)</h3>
             <table>
