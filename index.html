@@ -33,50 +33,49 @@
         </header>
 
         <section id="core-idea">
-            <h2>Core Idea: Scale-Dependent Inversion</h2>
-            <p>PonderTTT introduces <strong>Adaptive Test-Time Training</strong> with a simple, powerful heuristic: the
-                TTT layer's self-supervised <strong>Reconstruction Loss</strong>. We verified that this signal is a
-                robust proxy for learnability, but its relationship with performance <strong>inverts</strong> at scale.
+            <h2>Core Idea: Reconstruction Gating</h2>
+            <p>PonderTTT introduces <strong>Adaptive Test-Time Training</strong> with a simple heuristic: the
+                TTT layer's self-supervised <strong>Reconstruction Loss</strong>. We investigated this signal as
+                an inference-compatible proxy for learning benefit.
             </p>
 
-            <h3>Scaling Law: The Inversion</h3>
-            <p>The correlation between Reconstruction Loss and TTT Benefit ($r$) flips from positive to negative as
-                model size increases:</p>
+            <h3>Correlation: Reconstruction Loss vs Oracle Advantage</h3>
+            <p>The correlation between Reconstruction Loss and TTT Benefit is weak-to-moderate:</p>
             <table>
                 <thead>
                     <tr>
                         <th>Model</th>
                         <th>Correlation ($r$)</th>
-                        <th>Optimal Strategy</th>
+                        <th>Observation</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>125M</strong></td>
-                        <td><strong>+0.86</strong></td>
-                        <td>Normal Gating (Update on High Loss)</td>
+                        <td><strong>+0.30</strong></td>
+                        <td>Weak Positive</td>
                     </tr>
                     <tr>
                         <td><strong>350M</strong></td>
-                        <td><strong>-0.58</strong></td>
-                        <td>Inverted Gating (Update on Low Loss)</td>
+                        <td><strong>+0.35</strong></td>
+                        <td>Weak Positive</td>
                     </tr>
                     <tr>
                         <td><strong>Large (774M)</strong></td>
-                        <td><strong>-0.84</strong></td>
-                        <td>Inverted Gating</td>
+                        <td><strong>+0.45</strong></td>
+                        <td>Moderate</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
-                        <td><strong>-0.94</strong></td>
-                        <td>Inverted Gating</td>
+                        <td><strong>+0.61</strong></td>
+                        <td>Moderate</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p><strong>Key Insight:</strong> Small models benefit from updating on "surprising" (high loss) data.
-                Detailed analysis reveals that larger models treat high-loss chunks as noise; updating on them degrades
-                performance. Inverted Gating recovers <strong>99%</strong> of oracle performance on large models.</p>
+            <p><strong>Key Finding:</strong> Reconstruction loss shows positive correlation with Oracle advantage,
+                but the correlation is insufficient to significantly outperform random chunk selection.
+                Finding stronger gating signals remains an open research challenge.</p>
 
             <h3>Key Results (In-Distribution Python)</h3>
             <table>
@@ -245,8 +244,8 @@
                 <li><strong>TTT Layer:</strong> Fast-weight adapter with self-supervised updates</li>
                 <li><strong>Gating Signals:</strong>
                     <ul>
-                        <li>Reconstruction Loss (Inverted for 350M+)</li>
-                        <li>Scale-Dependent Thresholds</li>
+                        <li>Reconstruction Loss (threshold-based)</li>
+                        <li>Budget-aware Thresholds</li>
                     </ul>
                 </li>
             </ul>
