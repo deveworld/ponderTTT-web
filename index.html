@@ -91,43 +91,43 @@
                         <th>Model</th>
                         <th>Base Loss</th>
                         <th>Ours Loss</th>
-                        <th>Oracle Capture</th>
+                        <th>Oracle Recovery</th>
                         <th>Cost</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>125M</strong></td>
-                        <td>3.935</td>
-                        <td><strong>2.673</strong></td>
-                        <td>99.2%</td>
+                        <td>2.332</td>
+                        <td><strong>1.990</strong></td>
+                        <td>89.5%</td>
                         <td>2.0x</td>
                     </tr>
                     <tr>
                         <td><strong>350M</strong></td>
-                        <td>4.074</td>
-                        <td><strong>2.771</strong></td>
-                        <td>92.5%</td>
+                        <td>1.936</td>
+                        <td><strong>1.711</strong></td>
+                        <td>88.2%</td>
                         <td>2.0x</td>
                     </tr>
                     <tr>
-                        <td><strong>Large (774M)</strong></td>
-                        <td>5.332</td>
-                        <td><strong>3.310</strong></td>
-                        <td>100.0%</td>
+                        <td><strong>1B (Large)</strong></td>
+                        <td>2.005</td>
+                        <td><strong>1.738</strong></td>
+                        <td>97.1%</td>
                         <td>2.0x</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
-                        <td>6.357</td>
-                        <td><strong>2.976</strong></td>
-                        <td>100.0%</td>
+                        <td>1.875</td>
+                        <td><strong>1.622</strong></td>
+                        <td>97.3%</td>
                         <td>2.0x</td>
                     </tr>
                 </tbody>
             </table>
-            <p><strong>Perfect Recovery:</strong> PonderTTT recovers effectively all of the possible performance gain
-                achievable by an Oracle on large models.</p>
+            <p><strong>Scale Advantage:</strong> Larger models (1B, XL) achieve near-perfect Oracle recovery (>97%),
+                demonstrating that the gating signal becomes more reliable at scale.</p>
 
             <h3>OOD Generalization (Trained on Python, Tested on New Languages)</h3>
             <table>
@@ -136,24 +136,38 @@
                         <th>Language</th>
                         <th>Scale</th>
                         <th>Baseline (SKIP)</th>
-                        <th>Ours (Recon Gating)</th>
-                        <th>Improvement</th>
+                        <th>Ours (Gating)</th>
+                        <th>Oracle Recovery</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>JavaScript</td>
                         <td>125M</td>
-                        <td>PPL 79</td>
-                        <td>PPL 22</td>
-                        <td>3.6x</td>
+                        <td>2.640</td>
+                        <td>2.158</td>
+                        <td>92.5%</td>
+                    </tr>
+                    <tr>
+                        <td>JavaScript</td>
+                        <td>XL</td>
+                        <td>2.852</td>
+                        <td>2.138</td>
+                        <td>96.7%</td>
                     </tr>
                     <tr>
                         <td>Go</td>
-                        <td>350M</td>
-                        <td>PPL 5014</td>
-                        <td>PPL 236</td>
-                        <td>21.4x</td>
+                        <td>125M</td>
+                        <td>7.944</td>
+                        <td>5.047</td>
+                        <td>93.1%</td>
+                    </tr>
+                    <tr>
+                        <td>Go</td>
+                        <td>XL</td>
+                        <td>6.520</td>
+                        <td>4.275</td>
+                        <td>97.7%</td>
                     </tr>
                 </tbody>
             </table>
