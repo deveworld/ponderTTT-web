@@ -205,26 +205,26 @@
                 <tbody>
                     <tr>
                         <td>Baseline (SKIP)</td>
-                        <td>2.76 ms</td>
+                        <td>2.32 ms</td>
                         <td>1.00x</td>
-                        <td>11.4%</td>
+                        <td>7.0%</td>
                     </tr>
                     <tr>
                         <td>Baseline (UPDATE_1)</td>
-                        <td>2.49 ms</td>
-                        <td>0.90x</td>
-                        <td>23.3%</td>
+                        <td>1.92 ms</td>
+                        <td>0.83x</td>
+                        <td>15.8%</td>
                     </tr>
                     <tr>
-                        <td><strong>PonderTTT</strong></td>
-                        <td><strong>2.94 ms</strong></td>
-                        <td><strong>1.07x</strong></td>
-                        <td><strong>23.1%</strong></td>
+                        <td><strong>PonderTTT (50%)</strong></td>
+                        <td><strong>2.39 ms</strong></td>
+                        <td><strong>1.03x</strong></td>
+                        <td><strong>17.4%</strong></td>
                     </tr>
                 </tbody>
             </table>
-            <p><strong>Memory-Bound Efficiency:</strong> TTT updates utilize idle compute capacity (GPU utilization 11%
-                &rarr; 23%) in memory-bound small-batch inference, incurring minimal latency overhead.</p>
+            <p><strong>Memory-Bound Efficiency:</strong> TTT updates utilize idle compute capacity (GPU utilization 7%
+                &rarr; 17%) in memory-bound small-batch inference, incurring minimal latency overhead (1.03x).</p>
         </section>
 
         <section id="technical-architecture">
