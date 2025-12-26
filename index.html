@@ -39,9 +39,9 @@
                 an inference-compatible proxy for learning benefit.
             </p>
 
-            <h3>Correlation: Full-Sequence Reconstruction Loss vs Oracle Advantage</h3>
-            <p>Using the full-sequence reconstruction loss (<code>ttt_loss_init</code>), we achieve strong correlation:
-            </p>
+            <h3>Scale-Dependent Reliability: XL Models Recover >97% of Oracle</h3>
+            <p>Using the full-sequence reconstruction loss (<code>ttt_loss_init</code>), we observe that gating signal
+                reliability improves with model scale:</p>
             <table>
                 <thead>
                     <tr>
@@ -55,33 +55,34 @@
                     <tr>
                         <td><strong>125M</strong></td>
                         <td>Python</td>
-                        <td><strong>+0.82</strong></td>
-                        <td>88.7%</td>
+                        <td><strong>+0.67</strong></td>
+                        <td>89.5%</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>Python</td>
-                        <td><strong>+0.74</strong></td>
-                        <td>88.7%</td>
+                        <td><strong>+0.76</strong></td>
+                        <td>97.3%</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>JavaScript (OOD)</td>
-                        <td><strong>+0.79</strong></td>
-                        <td>86.9%</td>
+                        <td><strong>+0.84</strong></td>
+                        <td>96.7%</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>Go (OOD)</td>
-                        <td><strong>+0.53</strong></td>
-                        <td>86.0%</td>
+                        <td><strong>+0.75</strong></td>
+                        <td>97.7%</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p><strong>Key Finding:</strong> Full-Sequence Reconstruction Loss shows strong positive correlation
-                (r=0.53–0.82) with Oracle advantage, enabling Reconstruction Gating to consistently
-                recover <strong>86–89% of Oracle performance</strong> while outperforming Random Skip by 9–26%.</p>
+            <p><strong>Key Finding:</strong> The reliability of the self-supervised gating signal <strong>improves with
+                    model scale</strong>. While 125M shows moderate correlation ($r \approx 0.67$), XL models
+                demonstrate strong correlation ($r \ge 0.75$), enabling Reconstruction Gating to recover <strong>96–97%
+                    of Oracle performance</strong> across all evaluated languages.</p>
 
             <h3>Key Results (In-Distribution Python)</h3>
             <table>
