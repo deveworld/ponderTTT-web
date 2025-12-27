@@ -117,7 +117,7 @@
                         <td>2.0x</td>
                     </tr>
                     <tr>
-                        <td><strong>1B (Large)</strong></td>
+                        <td><strong>Large (774M)</strong></td>
                         <td>2.005</td>
                         <td><strong>1.738</strong></td>
                         <td>97.1%</td>
@@ -207,24 +207,25 @@
                         <td>Baseline (SKIP)</td>
                         <td>2.32 ms</td>
                         <td>1.00x</td>
-                        <td>7.0%</td>
+                        <td>17%</td>
                     </tr>
                     <tr>
                         <td>Baseline (UPDATE_1)</td>
                         <td>1.92 ms</td>
                         <td>0.83x</td>
-                        <td>15.8%</td>
+                        <td>24%</td>
                     </tr>
                     <tr>
                         <td><strong>PonderTTT (50%)</strong></td>
                         <td><strong>2.39 ms</strong></td>
                         <td><strong>1.03x</strong></td>
-                        <td><strong>17.4%</strong></td>
+                        <td><strong>20%</strong></td>
                     </tr>
                 </tbody>
             </table>
-            <p><strong>Memory-Bound Efficiency:</strong> TTT updates utilize idle compute capacity (GPU utilization 7%
-                &rarr; 17%) in memory-bound small-batch inference, incurring minimal latency overhead (1.03x).</p>
+            <p><strong>Memory-Bound Efficiency:</strong> GPU utilization is 17–34% at batch size 1, confirming
+                memory-bound inference.
+                The theoretical FLOPs reduction (2.0× vs 3.0×) manifests as reduced compute overhead.</p>
         </section>
 
         <section id="technical-architecture">
