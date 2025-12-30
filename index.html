@@ -53,7 +53,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>125M</strong></td>
+                        <td><strong>124M</strong></td>
                         <td>Python</td>
                         <td><strong>+0.67</strong></td>
                         <td>89.5%</td>
@@ -86,7 +86,7 @@
             </table>
 
             <p><strong>Key Finding:</strong> The reliability of the self-supervised gating signal <strong>improves with
-                    model scale</strong>. While 125M shows moderate correlation ($r \approx 0.67$), XL models
+                    model scale</strong>. While 124M shows moderate correlation ($r \approx 0.67$), XL models
                 demonstrate strong correlation ($r \ge 0.75$), enabling Reconstruction Gating to recover <strong>96–97%
                     of Oracle performance</strong> across all evaluated languages.</p>
 
@@ -103,14 +103,14 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>125M</strong></td>
+                        <td><strong>124M</strong></td>
                         <td>2.332</td>
                         <td><strong>1.990</strong></td>
                         <td>89.5%</td>
                         <td>2.0x</td>
                     </tr>
                     <tr>
-                        <td><strong>350M</strong></td>
+                        <td><strong>355M</strong></td>
                         <td>1.936</td>
                         <td><strong>1.711</strong></td>
                         <td>88.2%</td>
@@ -149,7 +149,7 @@
                 <tbody>
                     <tr>
                         <td>JavaScript</td>
-                        <td>125M</td>
+                        <td>124M</td>
                         <td>2.640</td>
                         <td>2.158</td>
                         <td>92.5%</td>
@@ -163,7 +163,7 @@
                     </tr>
                     <tr>
                         <td>Java</td>
-                        <td>125M</td>
+                        <td>124M</td>
                         <td>3.042</td>
                         <td>2.287</td>
                         <td>91.9%</td>
@@ -177,7 +177,7 @@
                     </tr>
                     <tr>
                         <td>Go</td>
-                        <td>125M</td>
+                        <td>124M</td>
                         <td>7.944</td>
                         <td>5.047</td>
                         <td>93.1%</td>
@@ -243,13 +243,13 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>GPT-2 125M</td>
-                        <td>125M</td>
+                        <td>GPT-2 124M</td>
+                        <td>124M</td>
                         <td>Validated</td>
                     </tr>
                     <tr>
-                        <td>GPT-2 350M</td>
-                        <td>350M</td>
+                        <td>GPT-2 355M</td>
+                        <td>355M</td>
                         <td>Validated</td>
                     </tr>
                     <tr>
@@ -308,7 +308,7 @@
                 <li>Pure NNX GPT-2, TTT Layer implementation</li>
                 <li>Gumbel-Softmax training for SKIP/UPDATE decisions</li>
                 <li>End-to-End differentiable training with budget constraints</li>
-                <li>Results on GPT-2 (125M, 350M) with OOD evaluation</li>
+                <li>Results on GPT-2 (124M, 355M) with OOD evaluation</li>
             </ul>
 
             <h3>Phase 2: In Progress</h3>
@@ -333,7 +333,7 @@
                         <td>In Progress</td>
                     </tr>
                     <tr>
-                        <td>Gemma 3 Integration (1B, 4B, 12B)</td>
+                        <td>Gemma 3 Integration (1B, 4B, 12B, 27B)</td>
                         <td>In Progress</td>
                     </tr>
                     <tr>
@@ -384,12 +384,6 @@ should_update = result["decision"]</code></pre>
             <h3>Reproduce Paper Results</h3>
             <pre><code>chmod +x scripts/run_all_experiments.sh
 ./scripts/run_all_experiments.sh</code></pre>
-
-            <h3>Evaluate Gating Methods</h3>
-            <pre><code># Compare TTT-only vs Multi-signal vs Budget-aware
-python -m ponderttt.experiments.evaluate_advanced_gating \
-    --checkpoint outputs/baselines/125m_update1/checkpoints/checkpoint_100000/ \
-    --num_batches 1000</code></pre>
 
             <h3>Gemma 3 on TPU</h3>
             <pre><code>from ponderttt.models.gemma3 import (
