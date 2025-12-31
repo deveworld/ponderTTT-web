@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PonderTTT: Adaptive Test-Time Training</title>
+    <title>PonderTTT: When to Ponder</title>
     <link rel="stylesheet" href="styles.css">
     <meta name="description"
-        content="Adaptive, budget-aware Test-Time Training (TTT) for code generation models. Reconstruction Gating recovers 99% of oracle performance.">
+        content="Adaptive Test-Time Training for code language modeling. Training-free Reconstruction Gating achieves 82-89% Oracle Recovery.">
     <!-- KaTeX for LaTeX rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
         integrity="sha384-WcoG4HRXMzYzfCgiyfrySxx90XSl2rxY5mnVY5TwtWE6KLrArNKn0T/mOgNL0Mmi" crossorigin="anonymous">
@@ -24,24 +24,71 @@
     <div class="container">
         <header>
             <h1>PonderTTT</h1>
-            <p class="subtitle">Adaptive, budget-aware Test-Time Training (TTT) for code generation models built with
-                JAX/Flax NNX.</p>
+            <p class="subtitle">When to Ponder: Adaptive Compute Allocation for Code Language Modeling via Test-Time
+                Training</p>
             <div class="links">
                 <a href="https://github.com/deveworld/ponderttt" class="btn">View on GitHub</a>
-                <a href="PonderTTT_preprint.pdf" class="btn btn-outline">Read Preprint</a>
+                <a href="PonderTTT_v1_Preprint.pdf" class="btn btn-outline">Read Paper (PDF)</a>
             </div>
         </header>
 
         <section id="core-idea">
-            <h2>Core Idea: Reconstruction Gating</h2>
-            <p>PonderTTT introduces <strong>Adaptive Test-Time Training</strong> with a simple heuristic: the
-                TTT layer's self-supervised <strong>Reconstruction Loss</strong>. We investigated this signal as
-                an inference-compatible proxy for learning benefit.
+            <h2>Core Idea: Training-Free Reconstruction Gating</h2>
+            <p>PonderTTT introduces <strong>Adaptive Test-Time Training (TTT)</strong> with a training-free gating
+                mechanism:
+                the TTT layer's self-supervised <strong>Reconstruction Loss</strong> selectively triggers updates.
+                No learned classifier or auxiliary networks required—only a threshold calibrated on unlabeled data.
             </p>
 
-            <h3>Scale-Dependent Reliability: XL Models Recover >97% of Oracle</h3>
-            <p>Using the full-sequence reconstruction loss (<code>ttt_loss_init</code>), we observe that gating signal
-                reliability improves with model scale:</p>
+            <h3>Key Results: 82–89% Oracle Recovery</h3>
+            <p>Using Reconstruction Gating with EMA-based threshold adaptation:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>SKIP (Base)</th>
+                        <th>Oracle</th>
+                        <th>Ours</th>
+                        <th>Recovery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Small (124M)</strong></td>
+                        <td>2.324</td>
+                        <td>1.935</td>
+                        <td><strong>1.977</strong></td>
+                        <td>89.2%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medium (355M)</strong></td>
+                        <td>1.909</td>
+                        <td>1.653</td>
+                        <td><strong>1.697</strong></td>
+                        <td>82.8%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Large (774M)</strong></td>
+                        <td>2.005</td>
+                        <td>1.580</td>
+                        <td><strong>1.656</strong></td>
+                        <td>82.1%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XL (1.5B)</strong></td>
+                        <td>1.875</td>
+                        <td>1.518</td>
+                        <td><strong>1.576</strong></td>
+                        <td>83.8%</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Key Finding:</strong> Training-free Reconstruction Gating achieves <strong>82–89% Oracle
+                    Recovery</strong>
+                while significantly outperforming Random Skip baselines (1–3% lower loss on Python, up to 16% on OOD
+                languages).</p>
+
+            <h3>Correlation Analysis</h3>
             <table>
                 <thead>
                     <tr>
@@ -53,179 +100,122 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>124M</strong></td>
+                        <td><strong>Small (124M)</strong></td>
                         <td>Python</td>
-                        <td><strong>+0.67</strong></td>
-                        <td>89.5%</td>
+                        <td><strong>+0.84</strong></td>
+                        <td>89.2%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medium (355M)</strong></td>
+                        <td>Python</td>
+                        <td>+0.43</td>
+                        <td>82.8%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Large (774M)</strong></td>
+                        <td>Python</td>
+                        <td>+0.62</td>
+                        <td>82.1%</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>Python</td>
-                        <td><strong>+0.76</strong></td>
-                        <td>97.3%</td>
+                        <td>+0.61</td>
+                        <td>83.8%</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>JavaScript (OOD)</td>
-                        <td><strong>+0.84</strong></td>
-                        <td>96.7%</td>
+                        <td>+0.74</td>
+                        <td>—</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>Java (OOD)</td>
-                        <td><strong>+0.90</strong></td>
-                        <td>97.5%</td>
+                        <td><strong>+0.84</strong></td>
+                        <td>—</td>
                     </tr>
                     <tr>
                         <td><strong>XL (1.5B)</strong></td>
                         <td>Go (OOD)</td>
-                        <td><strong>+0.75</strong></td>
-                        <td>97.7%</td>
+                        <td>+0.58</td>
+                        <td>—</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p><strong>Key Finding:</strong> The reliability of the self-supervised gating signal <strong>improves with
-                    model scale</strong>. While 124M shows moderate correlation ($r \approx 0.67$), XL models
-                demonstrate strong correlation ($r \ge 0.75$), enabling Reconstruction Gating to recover <strong>96–97%
-                    of Oracle performance</strong> across all evaluated languages.</p>
-
-            <h3>Key Results (In-Distribution Python)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Base Loss</th>
-                        <th>Ours Loss</th>
-                        <th>Oracle Recovery</th>
-                        <th>Cost</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>124M</strong></td>
-                        <td>2.332</td>
-                        <td><strong>1.990</strong></td>
-                        <td>89.5%</td>
-                        <td>2.0x</td>
-                    </tr>
-                    <tr>
-                        <td><strong>355M</strong></td>
-                        <td>1.936</td>
-                        <td><strong>1.711</strong></td>
-                        <td>88.2%</td>
-                        <td>2.0x</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Large (774M)</strong></td>
-                        <td>2.005</td>
-                        <td><strong>1.738</strong></td>
-                        <td>97.1%</td>
-                        <td>2.0x</td>
-                    </tr>
-                    <tr>
-                        <td><strong>XL (1.5B)</strong></td>
-                        <td>1.875</td>
-                        <td><strong>1.622</strong></td>
-                        <td>97.3%</td>
-                        <td>2.0x</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p><strong>Scale Advantage:</strong> Larger models (1B, XL) achieve near-optimal Oracle recovery (>97%),
-                demonstrating that the gating signal becomes more reliable at scale.</p>
-
-            <h3>OOD Generalization (Trained on Python, Tested on New Languages)</h3>
+            <h3>OOD Generalization (XL 1.5B)</h3>
             <table>
                 <thead>
                     <tr>
                         <th>Language</th>
-                        <th>Scale</th>
-                        <th>Baseline (SKIP)</th>
-                        <th>Ours (Gating)</th>
-                        <th>Oracle Recovery</th>
+                        <th>SKIP</th>
+                        <th>Random</th>
+                        <th>Ours</th>
+                        <th>Oracle</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>JavaScript</td>
-                        <td>124M</td>
-                        <td>2.640</td>
-                        <td>2.158</td>
-                        <td>92.5%</td>
-                    </tr>
-                    <tr>
-                        <td>JavaScript</td>
-                        <td>XL</td>
-                        <td>2.852</td>
-                        <td>2.138</td>
-                        <td>96.7%</td>
+                        <td>2.85</td>
+                        <td>2.12</td>
+                        <td><strong>1.84</strong></td>
+                        <td>1.57</td>
                     </tr>
                     <tr>
                         <td>Java</td>
-                        <td>124M</td>
-                        <td>3.042</td>
-                        <td>2.287</td>
-                        <td>91.9%</td>
-                    </tr>
-                    <tr>
-                        <td>Java</td>
-                        <td>XL</td>
-                        <td>3.213</td>
-                        <td>2.292</td>
-                        <td>97.5%</td>
+                        <td>3.21</td>
+                        <td>2.33</td>
+                        <td><strong>1.95</strong></td>
+                        <td>1.64</td>
                     </tr>
                     <tr>
                         <td>Go</td>
-                        <td>124M</td>
-                        <td>7.944</td>
-                        <td>5.047</td>
-                        <td>93.1%</td>
-                    </tr>
-                    <tr>
-                        <td>Go</td>
-                        <td>XL</td>
-                        <td>6.520</td>
-                        <td>4.275</td>
-                        <td>97.7%</td>
+                        <td>6.52</td>
+                        <td>4.25</td>
+                        <td><strong>4.15</strong></td>
+                        <td>3.70</td>
                     </tr>
                 </tbody>
             </table>
+            <p><strong>Up to 16% lower loss</strong> on OOD languages compared to Random Skip.</p>
 
-            <h3>Latency & Efficiency (NVIDIA RTX PRO 6000)</h3>
+            <h3>Decision Accuracy</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Method</th>
-                        <th>Latency</th>
-                        <th>Rel. Speed</th>
-                        <th>GPU Util</th>
+                        <th>Model</th>
+                        <th>Random Skip</th>
+                        <th>Ours (Recon Gating)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Baseline (SKIP)</td>
-                        <td>2.32 ms</td>
-                        <td>1.00x</td>
-                        <td>17%</td>
+                        <td>Small (124M)</td>
+                        <td>52.0%</td>
+                        <td><strong>59.1%</strong></td>
                     </tr>
                     <tr>
-                        <td>Baseline (UPDATE_1)</td>
-                        <td>1.92 ms</td>
-                        <td>0.83x</td>
-                        <td>24%</td>
+                        <td>Medium (355M)</td>
+                        <td>52.2%</td>
+                        <td><strong>57.5%</strong></td>
                     </tr>
                     <tr>
-                        <td><strong>PonderTTT (50%)</strong></td>
-                        <td><strong>2.39 ms</strong></td>
-                        <td><strong>1.03x</strong></td>
-                        <td><strong>20%</strong></td>
+                        <td>Large (774M)</td>
+                        <td>51.8%</td>
+                        <td><strong>59.2%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>XL (1.5B)</td>
+                        <td>52.8%</td>
+                        <td><strong>59.6%</strong></td>
                     </tr>
                 </tbody>
             </table>
-            <p><strong>Memory-Bound Efficiency:</strong> GPU utilization is 17–34% at batch size 1, confirming
-                memory-bound inference.
-                The theoretical FLOPs reduction (2.0× vs 3.0×) manifests as reduced compute overhead.</p>
+            <p>~59% decision accuracy vs Oracle (7pp above random), statistically significant ($p < 10^{-10}$, McNemar's
+                    test).</p>
+
         </section>
 
         <section id="technical-architecture">
@@ -243,39 +233,34 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>GPT-2 124M</td>
+                        <td>GPT-2 Small</td>
                         <td>124M</td>
-                        <td>Validated</td>
+                        <td>✅ Validated</td>
                     </tr>
                     <tr>
-                        <td>GPT-2 355M</td>
+                        <td>GPT-2 Medium</td>
                         <td>355M</td>
-                        <td>Validated</td>
+                        <td>✅ Validated</td>
                     </tr>
                     <tr>
                         <td>GPT-2 Large</td>
                         <td>774M</td>
-                        <td>Validated</td>
+                        <td>✅ Validated</td>
                     </tr>
                     <tr>
                         <td>GPT-2 XL</td>
                         <td>1.5B</td>
-                        <td>Validated</td>
-                    </tr>
-                    <tr>
-                        <td>Gemma 3 1B</td>
-                        <td>1B</td>
-                        <td>In Progress</td>
+                        <td>✅ Validated</td>
                     </tr>
                     <tr>
                         <td>Gemma 3 4B</td>
                         <td>4B</td>
-                        <td>In Progress</td>
+                        <td>Planned (v2)</td>
                     </tr>
                     <tr>
                         <td>Gemma 3 12B</td>
                         <td>12B</td>
-                        <td>In Progress (TPU)</td>
+                        <td>Planned (v2)</td>
                     </tr>
                 </tbody>
             </table>
@@ -284,73 +269,15 @@
             <ul>
                 <li><strong>Base Model:</strong> Pretrained backbone with frozen weights</li>
                 <li><strong>TTT Layer:</strong> Fast-weight adapter with self-supervised updates</li>
-                <li><strong>Gating Signals:</strong>
-                    <ul>
-                        <li>Reconstruction Loss (threshold-based)</li>
-                        <li>Budget-aware Thresholds</li>
-                    </ul>
-                </li>
+                <li><strong>Gating:</strong> Training-free threshold on reconstruction loss with EMA adaptation</li>
             </ul>
 
             <h3>Loss Function</h3>
-            <p>\( L_{total} = L_{CE} + \beta \cdot L_{TTT} \)</p>
+            <p>\( L_{total} = L_{CE} + \beta \cdot L_{TTT} \) where $\beta = 0.1$</p>
             <ul>
                 <li>\( L_{CE} \): Main task cross-entropy (next-token prediction)</li>
-                <li>\( L_{TTT} \): TTT reconstruction loss (self-supervised adaptation signal)</li>
+                <li>\( L_{TTT} \): TTT reconstruction loss (self-supervised, also used for gating)</li>
             </ul>
-        </section>
-
-        <section id="roadmap">
-            <h2>Roadmap & Status</h2>
-
-            <h3>Phase 1: Complete (Preprint)</h3>
-            <ul>
-                <li>Pure NNX GPT-2, TTT Layer implementation</li>
-                <li>Gumbel-Softmax training for SKIP/UPDATE decisions</li>
-                <li>End-to-End differentiable training with budget constraints</li>
-                <li>Results on GPT-2 (124M, 355M) with OOD evaluation</li>
-            </ul>
-
-            <h3>Phase 2: In Progress</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Component</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Crawl Phase (TTT Improvement gating)</td>
-                        <td>Complete</td>
-                    </tr>
-                    <tr>
-                        <td>Walk Phase (Fixed threshold, online)</td>
-                        <td>Complete</td>
-                    </tr>
-                    <tr>
-                        <td>Run Phase (Multi-signal + budget-aware)</td>
-                        <td>In Progress</td>
-                    </tr>
-                    <tr>
-                        <td>Gemma 3 Integration (1B, 4B, 12B, 27B)</td>
-                        <td>In Progress</td>
-                    </tr>
-                    <tr>
-                        <td>TPU Pod Sharding</td>
-                        <td>In Progress</td>
-                    </tr>
-                    <tr>
-                        <td>LoRA-TTT</td>
-                        <td>Planned</td>
-                    </tr>
-                    <tr>
-                        <td>Reasoning Benchmarks (MATH500, GSM8K, etc.)</td>
-                        <td>Planned</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>See <code>paper/plan.md</code> for detailed roadmap.</p>
         </section>
 
         <section id="quick-start">
@@ -363,52 +290,16 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Install the project
 uv pip install -e . --group gpu  # or tpu/cpu</code></pre>
 
-            <h3>Training-Free Gating (Recommended)</h3>
-            <pre><code>from ponderttt.models import create_advanced_gating
-
-# Create gating network
-gating = create_advanced_gating(
-    mode="threshold",  # or "budget_aware", "learned"
-    use_entropy=True,
-    use_token_confidence=True,
-    target_update_rate=0.5,
-)
-
-# Get gating decision
-result = gating(
-    ttt_improvement=ttt_stats["ttt_loss_step_0"] - ttt_stats["ttt_loss_step_1"],
-    logits=model_output["logits"],
-)
-should_update = result["decision"]</code></pre>
-
             <h3>Reproduce Paper Results</h3>
             <pre><code>chmod +x scripts/run_all_experiments.sh
 ./scripts/run_all_experiments.sh</code></pre>
 
-            <h3>Gemma 3 on TPU</h3>
-            <pre><code>from ponderttt.models.gemma3 import (
-    Gemma3Config,
-    Gemma3TTTModel,
-    load_gemma3_from_huggingface,
-    create_device_mesh,
-    ShardingConfig,
-)
-
-# Initialize
-config = Gemma3Config.gemma3_4b()
-model = Gemma3TTTModel(config, ttt_config, rngs=rngs)
-
-# Load pretrained weights
-model = load_gemma3_from_huggingface(model, "google/gemma-3-4b-pt")
-
-# Setup TPU sharding
-mesh = create_device_mesh(ShardingConfig())</code></pre>
         </section>
 
         <section id="citation">
             <h2>Citation</h2>
             <div class="citation">@article{sim2025ponderttt,
-                title={Learning to Ponder: Adaptive Compute Allocation via Test-Time Training},
+                title={When to Ponder: Adaptive Compute Allocation for Code Generation via Test-Time Training},
                 author={Sim, Gihyeon},
                 year={2025}
                 }</div>
@@ -422,3 +313,4 @@ mesh = create_device_mesh(ShardingConfig())</code></pre>
 </body>
 
 </html>
+</code></pre>
