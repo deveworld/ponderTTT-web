@@ -1,316 +1,241 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PonderTTT: When to Ponder</title>
-    <link rel="stylesheet" href="styles.css">
     <meta name="description"
         content="Adaptive Test-Time Training for code language modeling. Training-free Reconstruction Gating achieves 82-89% Oracle Recovery.">
-    <!-- KaTeX for LaTeX rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
-        integrity="sha384-WcoG4HRXMzYzfCgiyfrySxx90XSl2rxY5mnVY5TwtWE6KLrArNKn0T/mOgNL0Mmi" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.js"
-        integrity="sha384-J+9dG2KMoiR9hqcFao0IBLwxt6zpcyN68IgwzsCSkbreXUjmNVRhPFTssqdSGjwQ"
-        crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/contrib/auto-render.min.js"
-        integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.4/css/bulma.min.css">
+
+    <!-- Academicons for arXiv icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.6/css/academicons.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
         onload="renderMathInElement(document.body);"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans', Arial, sans-serif;
+        }
+
+        .author-block {
+            display: inline-block;
+        }
+
+        .publication-links .button {
+            margin: 0 0.5rem;
+        }
+
+        .section-title {
+            border-bottom: 1px solid #dbdbdb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bibtex-body {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            text-align: left;
+            border-radius: 4px;
+        }
+
+        table.results-table {
+            margin: 0 auto;
+        }
+
+        table.results-table th,
+        table.results-table td {
+            text-align: center;
+            padding: 0.5rem 1rem;
+        }
+
+        table.results-table th:first-child,
+        table.results-table td:first-child {
+            text-align: left;
+        }
+
+        .content-paragraph {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: justify;
+        }
+    </style>
 </head>
 
 <body>
+    <section class="section">
+        <div class="container is-max-desktop">
+            <!-- Title -->
+            <div class="has-text-centered">
+                <h1 class="title is-2">
+                    When to Ponder: Adaptive Compute Allocation for Code Generation via Test-Time Training
+                </h1>
 
-    <div class="container">
-        <header>
-            <h1>PonderTTT</h1>
-            <p class="subtitle">When to Ponder: Adaptive Compute Allocation for Code Language Modeling via Test-Time
-                Training</p>
-            <div class="links">
-                <a href="https://github.com/deveworld/ponderttt" class="btn">View on GitHub</a>
-                <a href="PonderTTT_v1_Preprint.pdf" class="btn btn-outline">Read Paper (PDF)</a>
+                <!-- Authors -->
+                <div class="is-size-5 mb-2">
+                    <span class="author-block">
+                        <a href="https://github.com/deveworld">Gihyeon Sim</a>
+                    </span>
+                </div>
+
+                <!-- Links -->
+                <div class="publication-links mt-4">
+                    <a class="button is-dark is-rounded" href="https://arxiv.org/abs/2601.00894">
+                        <span class="icon"><i class="ai ai-arxiv"></i></span>
+                        <span>Paper</span>
+                    </a>
+                    <a class="button is-dark is-rounded" href="https://github.com/deveworld/ponderttt">
+                        <span class="icon"><i class="fab fa-github"></i></span>
+                        <span>Code</span>
+                    </a>
+                </div>
             </div>
-        </header>
+        </div>
+    </section>
 
-        <section id="core-idea">
-            <h2>Core Idea: Training-Free Reconstruction Gating</h2>
-            <p>PonderTTT introduces <strong>Adaptive Test-Time Training (TTT)</strong> with a training-free gating
-                mechanism:
-                the TTT layer's self-supervised <strong>Reconstruction Loss</strong> selectively triggers updates.
-                No learned classifier or auxiliary networks required—only a threshold calibrated on unlabeled data.
+    <!-- Abstract -->
+    <section class="section pt-0">
+        <div class="container is-max-desktop">
+            <h2 class="title is-4 section-title">Abstract</h2>
+            <div class="content-paragraph">
+                <p>
+                    We propose <strong>PonderTTT</strong>, a method that applies selective computational updates
+                    to language model inputs based on difficulty. Using a reconstruction loss signal from TTT layers,
+                    the system decides when to trigger additional processing—a decision made without any learned classifier.
+                    A single scalar threshold, calibrated on unlabeled data and adapted during inference, governs update frequency.
+                    Testing on GPT-2 models (124M to 1.5B parameters) for code language modeling shows our approach achieves
+                    <strong>82–89% Oracle Recovery</strong> while being fully training-free, and substantially improves
+                    performance on out-of-distribution languages compared to random baseline approaches.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results -->
+    <section class="section pt-0">
+        <div class="container is-max-desktop">
+            <h2 class="title is-4 section-title">Results</h2>
+
+            <h3 class="title is-5 has-text-centered">Main Results (Python In-Distribution)</h3>
+            <div class="table-container">
+                <table class="table is-bordered is-hoverable results-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>SKIP</th>
+                            <th>Oracle</th>
+                            <th>Ours</th>
+                            <th>Recovery</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Small (124M)</td>
+                            <td>2.324</td>
+                            <td>1.935</td>
+                            <td><strong>1.977</strong></td>
+                            <td>89.2%</td>
+                        </tr>
+                        <tr>
+                            <td>Medium (355M)</td>
+                            <td>1.909</td>
+                            <td>1.653</td>
+                            <td><strong>1.697</strong></td>
+                            <td>82.8%</td>
+                        </tr>
+                        <tr>
+                            <td>Large (774M)</td>
+                            <td>2.005</td>
+                            <td>1.580</td>
+                            <td><strong>1.656</strong></td>
+                            <td>82.1%</td>
+                        </tr>
+                        <tr>
+                            <td>XL (1.5B)</td>
+                            <td>1.875</td>
+                            <td>1.518</td>
+                            <td><strong>1.576</strong></td>
+                            <td>83.8%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="title is-5 has-text-centered mt-6">OOD Generalization (XL 1.5B)</h3>
+            <div class="table-container">
+                <table class="table is-bordered is-hoverable results-table">
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th>SKIP</th>
+                            <th>Random</th>
+                            <th>Ours</th>
+                            <th>Oracle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>JavaScript</td>
+                            <td>2.85</td>
+                            <td>2.12</td>
+                            <td><strong>1.84</strong></td>
+                            <td>1.57</td>
+                        </tr>
+                        <tr>
+                            <td>Java</td>
+                            <td>3.21</td>
+                            <td>2.33</td>
+                            <td><strong>1.95</strong></td>
+                            <td>1.64</td>
+                        </tr>
+                        <tr>
+                            <td>Go</td>
+                            <td>6.52</td>
+                            <td>4.25</td>
+                            <td><strong>4.15</strong></td>
+                            <td>3.70</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- BibTeX -->
+    <section class="section pt-0">
+        <div class="container is-max-desktop">
+            <h2 class="title is-4 section-title">BibTeX</h2>
+            <div class="bibtex-body">@article{sim2025ponderttt,
+  title={When to Ponder: Adaptive Compute Allocation for Code Generation via Test-Time Training},
+  author={Sim, Gihyeon},
+  journal={arXiv preprint arXiv:2601.00894},
+  year={2025}
+}</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p class="is-size-7 has-text-grey">
+                Built with JAX/Flax NNX
             </p>
-
-            <h3>Key Results: 82–89% Oracle Recovery</h3>
-            <p>Using Reconstruction Gating with EMA-based threshold adaptation:</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>SKIP (Base)</th>
-                        <th>Oracle</th>
-                        <th>Ours</th>
-                        <th>Recovery</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Small (124M)</strong></td>
-                        <td>2.324</td>
-                        <td>1.935</td>
-                        <td><strong>1.977</strong></td>
-                        <td>89.2%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Medium (355M)</strong></td>
-                        <td>1.909</td>
-                        <td>1.653</td>
-                        <td><strong>1.697</strong></td>
-                        <td>82.8%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Large (774M)</strong></td>
-                        <td>2.005</td>
-                        <td>1.580</td>
-                        <td><strong>1.656</strong></td>
-                        <td>82.1%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>XL (1.5B)</strong></td>
-                        <td>1.875</td>
-                        <td>1.518</td>
-                        <td><strong>1.576</strong></td>
-                        <td>83.8%</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p><strong>Key Finding:</strong> Training-free Reconstruction Gating achieves <strong>82–89% Oracle
-                    Recovery</strong>
-                while significantly outperforming Random Skip baselines (1–3% lower loss on Python, up to 16% on OOD
-                languages).</p>
-
-            <h3>Correlation Analysis</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Language</th>
-                        <th>Correlation ($r$)</th>
-                        <th>Oracle Recovery</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Small (124M)</strong></td>
-                        <td>Python</td>
-                        <td><strong>+0.84</strong></td>
-                        <td>89.2%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Medium (355M)</strong></td>
-                        <td>Python</td>
-                        <td>+0.43</td>
-                        <td>82.8%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Large (774M)</strong></td>
-                        <td>Python</td>
-                        <td>+0.62</td>
-                        <td>82.1%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>XL (1.5B)</strong></td>
-                        <td>Python</td>
-                        <td>+0.61</td>
-                        <td>83.8%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>XL (1.5B)</strong></td>
-                        <td>JavaScript (OOD)</td>
-                        <td>+0.74</td>
-                        <td>79.2%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>XL (1.5B)</strong></td>
-                        <td>Java (OOD)</td>
-                        <td><strong>+0.84</strong></td>
-                        <td>80.6%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>XL (1.5B)</strong></td>
-                        <td>Go (OOD)</td>
-                        <td>+0.58</td>
-                        <td>83.9%</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>OOD Generalization (XL 1.5B)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Language</th>
-                        <th>SKIP</th>
-                        <th>Random</th>
-                        <th>Ours</th>
-                        <th>Oracle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>JavaScript</td>
-                        <td>2.85</td>
-                        <td>2.12</td>
-                        <td><strong>1.84</strong></td>
-                        <td>1.57</td>
-                    </tr>
-                    <tr>
-                        <td>Java</td>
-                        <td>3.21</td>
-                        <td>2.33</td>
-                        <td><strong>1.95</strong></td>
-                        <td>1.64</td>
-                    </tr>
-                    <tr>
-                        <td>Go</td>
-                        <td>6.52</td>
-                        <td>4.25</td>
-                        <td><strong>4.15</strong></td>
-                        <td>3.70</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p><strong>Up to 16% lower loss</strong> on OOD languages compared to Random Skip.</p>
-
-            <h3>Decision Accuracy</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Random Skip</th>
-                        <th>Ours (Recon Gating)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Small (124M)</td>
-                        <td>52.0%</td>
-                        <td><strong>59.1%</strong></td>
-                    </tr>
-                    <tr>
-                        <td>Medium (355M)</td>
-                        <td>52.2%</td>
-                        <td><strong>57.5%</strong></td>
-                    </tr>
-                    <tr>
-                        <td>Large (774M)</td>
-                        <td>51.8%</td>
-                        <td><strong>59.2%</strong></td>
-                    </tr>
-                    <tr>
-                        <td>XL (1.5B)</td>
-                        <td>52.8%</td>
-                        <td><strong>59.6%</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>~59% decision accuracy vs Oracle (7pp above random), statistically significant ($p < 10^{-10}$, McNemar's
-                    test).</p>
-
-        </section>
-
-        <section id="technical-architecture">
-            <h2>Technical Architecture</h2>
-            <p>Pure <strong>JAX/Flax NNX</strong> implementation with multi-scale model support.</p>
-
-            <h3>Supported Models</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Parameters</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>GPT-2 Small</td>
-                        <td>124M</td>
-                        <td>✅ Validated</td>
-                    </tr>
-                    <tr>
-                        <td>GPT-2 Medium</td>
-                        <td>355M</td>
-                        <td>✅ Validated</td>
-                    </tr>
-                    <tr>
-                        <td>GPT-2 Large</td>
-                        <td>774M</td>
-                        <td>✅ Validated</td>
-                    </tr>
-                    <tr>
-                        <td>GPT-2 XL</td>
-                        <td>1.5B</td>
-                        <td>✅ Validated</td>
-                    </tr>
-                    <tr>
-                        <td>Gemma 3 4B</td>
-                        <td>4B</td>
-                        <td>Planned (v2)</td>
-                    </tr>
-                    <tr>
-                        <td>Gemma 3 12B</td>
-                        <td>12B</td>
-                        <td>Planned (v2)</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>Components</h3>
-            <ul>
-                <li><strong>Base Model:</strong> Pretrained backbone with frozen weights</li>
-                <li><strong>TTT Layer:</strong> Fast-weight adapter with self-supervised updates</li>
-                <li><strong>Gating:</strong> Training-free threshold on reconstruction loss with EMA adaptation</li>
-            </ul>
-
-            <h3>Loss Function</h3>
-            <p>\( L_{total} = L_{CE} + \beta \cdot L_{TTT} \) where $\beta = 0.1$</p>
-            <ul>
-                <li>\( L_{CE} \): Main task cross-entropy (next-token prediction)</li>
-                <li>\( L_{TTT} \): TTT reconstruction loss (self-supervised, also used for gating)</li>
-            </ul>
-        </section>
-
-        <section id="quick-start">
-            <h2>Quick Start</h2>
-
-            <h3>Installation</h3>
-            <pre><code># Install uv if you do not have it yet
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install the project
-uv pip install -e . --group gpu  # or tpu/cpu</code></pre>
-
-            <h3>Reproduce Paper Results</h3>
-            <pre><code>chmod +x scripts/run_all_experiments.sh
-./scripts/run_all_experiments.sh</code></pre>
-
-        </section>
-
-        <section id="citation">
-            <h2>Citation</h2>
-            <div class="citation">@article{sim2025ponderttt,
-                title={When to Ponder: Adaptive Compute Allocation for Code Generation via Test-Time Training},
-                author={Sim, Gihyeon},
-                year={2025}
-                }</div>
-        </section>
-
-        <footer>
-            <p>&copy; 2025 PonderTTT Project. Built with JAX/Flax NNX.</p>
-        </footer>
-    </div>
+        </div>
+    </footer>
 
 </body>
 
 </html>
-</code></pre>
